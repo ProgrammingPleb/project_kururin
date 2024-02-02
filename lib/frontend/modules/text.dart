@@ -32,3 +32,33 @@ class SectionDetailText extends StatelessWidget {
     );
   }
 }
+
+class CardSpaceBetweenText extends StatelessWidget {
+  final String left;
+  final String right;
+
+  const CardSpaceBetweenText({
+    super.key,
+    required this.left,
+    required this.right,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "$left:",
+          ),
+          Text(
+            right,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}

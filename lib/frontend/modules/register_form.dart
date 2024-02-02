@@ -3,16 +3,16 @@ import 'package:ticketing_system/backend/user.dart';
 import 'package:ticketing_system/frontend/modules/text_fields.dart';
 import 'package:ticketing_system/models/user.dart';
 
-class LoginForm extends StatefulWidget {
+class RegistrationForm extends StatefulWidget {
   final ValueSetter<User> userAccount;
 
-  const LoginForm({super.key, required this.userAccount});
+  const RegistrationForm({super.key, required this.userAccount});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  State<RegistrationForm> createState() => _RegistrationFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _RegistrationFormState extends State<RegistrationForm> {
   TextEditingController usernameInput = TextEditingController();
   TextEditingController passwordInput = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();

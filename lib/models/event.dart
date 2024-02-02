@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ticketing_system/backend/event.dart';
 import 'package:ticketing_system/exceptions.dart';
-import 'package:ticketing_system/frontend/event_card.dart';
+import 'package:ticketing_system/frontend/modules/event_card.dart';
 import 'package:ticketing_system/frontend/modules/event_details.dart';
+import 'package:ticketing_system/models/ticket.dart';
 
 class Event {
   EventDate date;
@@ -85,6 +86,7 @@ class EventDetails {
 
   Widget get pageWidgets {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         EventDetailsLine(title: "Time:", content: time.displayText),
         EventDetailsSection(title: "Location:", content: location),
@@ -256,6 +258,24 @@ class BackendEventListResponse extends BackendResponse {
   }
 }
 
+class BackendEventInfoResponse extends BackendResponse {
+  Event? event;
+
+  BackendEventInfoResponse({
+    required super.success,
+    super.errorMessage,
+    this.event,
+  });
+
+  factory BackendEventInfoResponse.fromJson(Map<String, dynamic> json) {
+    return BackendEventInfoResponse(
+      success: json["success"],
+      errorMessage: json.containsKey("msg") ? json["msg"] : null,
+      event: json.containsKey("info") ? Event.fromJson(json["info"]) : null,
+    );
+  }
+}
+
 class BackendEventDetailsResponse extends BackendResponse {
   EventDetails? details;
 
@@ -272,6 +292,25 @@ class BackendEventDetailsResponse extends BackendResponse {
       details: json.containsKey("details")
           ? EventDetails.fromJson(json["details"])
           : null,
+    );
+  }
+}
+
+class BackendEventTicketsResponse extends BackendResponse {
+  List<TicketInfo> tickets;
+
+  BackendEventTicketsResponse({
+    required super.success,
+    super.errorMessage,
+    this.tickets = const [],
+  });
+
+  factory BackendEventTicketsResponse.fromJson(Map<String, dynamic> json) {
+    return BackendEventTicketsResponse(
+      success: json["success"],
+      errorMessage: json.containsKey("msg") ? json["msg"] : null,
+      tickets: List<TicketInfo>.from(
+          json['tickets'].map((x) => TicketInfo.fromJson(x))),
     );
   }
 }

@@ -138,9 +138,12 @@ Column generateFullProfile(User user, Image? profileImage, bool imageLoading) {
                 shape: BoxShape.circle,
               ),
               child: Skeleton.replace(
-                  child: user.pictureUrl != null
-                      ? profileImage!
-                      : const ColoredBox(color: Colors.grey)),
+                width: 80,
+                height: 80,
+                child: user.pictureUrl != null
+                    ? profileImage!
+                    : const ColoredBox(color: Colors.grey),
+              ),
             ),
           ),
           Padding(
@@ -186,16 +189,14 @@ Column generateFullProfile(User user, Image? profileImage, bool imageLoading) {
       DescriptionTextField(
         name: "Email",
         controller: TextEditingController(
-          text: "example@foo.bar",
+          text: user.email,
         ),
         description: AccountDetailsHints.email.text(user),
       ),
       DescriptionTextField(
         name: "Address",
         controller: TextEditingController(
-          text: "25A, Jalan SS 4D/2,\n"
-              "SS 4 People’s Park,\n"
-              "47301 Petaling Jaya, Selangor",
+          text: user.address,
         ),
         description: AccountDetailsHints.address.text(user),
         multiline: true,

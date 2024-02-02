@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:ticketing_system/backend/event.dart';
 import 'package:ticketing_system/frontend/app_states.dart';
-import 'package:ticketing_system/models/app.dart';
 import 'package:ticketing_system/models/event.dart';
+import 'package:ticketing_system/models/user.dart';
 
 class EventListingsPage extends StatefulWidget {
   final ValueNotifier<ListRefreshData> refreshListener;
-  final List<Widget> events;
+  final User? user;
 
   const EventListingsPage({
     super.key,
-    required this.events,
     required this.refreshListener,
+    this.user,
   });
 
   @override
@@ -22,13 +22,40 @@ class _EventListingsPageState extends State<EventListingsPage> {
   late bool listRefreshing;
   List<Widget> events = [];
 
+  void getSelfEvents() {
+    getEventsList(user: widget.user).then(
+      (eventsListResp) {
+        setState(() {
+          List<Widget> events = [];
+          if (eventsListResp.success) {
+            for (Event event in eventsListResp.events) {
+              events.add(event.card);
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  eventsListResp.errorMessage!,
+                ),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+          widget.refreshListener.value = ListRefreshData(
+            ongoing: false,
+            events: events,
+          );
+        });
+      },
+    );
+  }
+
   @override
   void initState() {
     listRefreshing = widget.refreshListener.value.ongoing;
-    if (widget.refreshListener.value.events == []) {
-      events = widget.events;
-    } else {
-      events = widget.refreshListener.value.events;
+    events = widget.refreshListener.value.events;
+    if (widget.user != null) {
+      getSelfEvents();
     }
     super.initState();
     widget.refreshListener.addListener(() {
@@ -49,45 +76,7 @@ class _EventListingsPageState extends State<EventListingsPage> {
           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
           sliver: SliverAppBar.large(
             title: const Text("Upcoming Events"),
-            actions: _refreshAction(listRefreshing, (status) {
-              if (mounted) {
-                setState(() {
-                  listRefreshing = status.ongoing;
-                });
-
-                if (!status.ongoing) {
-                  if (status.success) {
-                    events = [];
-                    for (Event event in status.response!.events) {
-                      events.add(event.card);
-                    }
-
-                    widget.refreshListener.value = ListRefreshData(
-                      ongoing: false,
-                      events: events,
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          "Refreshed event listings!",
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          status.response!.errorMessage!,
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  }
-                }
-              }
-            }),
+            actions: _refreshAction(),
           ),
         ),
       ],
@@ -106,48 +95,57 @@ class _EventListingsPageState extends State<EventListingsPage> {
       ),
     );
   }
-}
 
-List<Widget> _refreshAction(
-  bool loading,
-  ValueSetter<EventListRefreshStatus> onStatusChanged,
-) {
-  if (loading) {
-    return [
-      const Padding(
-        padding: EdgeInsets.fromLTRB(8, 8, 15, 8),
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 3,
+  List<Widget> _refreshAction() {
+    if (widget.refreshListener.value.ongoing) {
+      return [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(8, 8, 15, 8),
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+            ),
           ),
         ),
+      ];
+    }
+    return [
+      IconButton(
+        onPressed: () {
+          widget.refreshListener.value = ListRefreshData(
+            ongoing: true,
+            events: widget.refreshListener.value.events,
+          );
+          getEventsList(user: widget.user).then(
+            (eventsListResp) {
+              if (eventsListResp.success) {
+                widget.refreshListener.value = ListRefreshData(
+                  ongoing: false,
+                  events: List<Widget>.from(
+                    eventsListResp.events.map((e) => e.card),
+                  ),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Successfully refreshed the event list!"),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(eventsListResp.errorMessage!),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+          );
+        },
+        icon: const Icon(Icons.refresh),
       ),
     ];
   }
-  return [
-    IconButton(
-      onPressed: () {
-        onStatusChanged(
-          EventListRefreshStatus(
-            ongoing: true,
-            success: false,
-          ),
-        );
-        getEventsList().then(
-          (eventsListResp) {
-            onStatusChanged(
-              EventListRefreshStatus(
-                ongoing: false,
-                success: eventsListResp.success,
-                response: eventsListResp,
-              ),
-            );
-          },
-        );
-      },
-      icon: const Icon(Icons.refresh),
-    ),
-  ];
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:ticketing_system/backend/event.dart';
 import 'package:ticketing_system/frontend/modules/flex.dart';
 import 'package:ticketing_system/frontend/modules/event_details.dart';
 import 'package:ticketing_system/frontend/modules/skeletons.dart';
+import 'package:ticketing_system/frontend/modules/ticket_card.dart';
 import 'package:ticketing_system/models/event.dart';
 
 class EventDetailsPage extends StatefulWidget {
@@ -16,10 +18,12 @@ class EventDetailsPage extends StatefulWidget {
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
   EventDetails? details;
+  List<Widget> ticketCards = [];
   late Image organizerImage;
   late Image bannerImage;
   bool organizerImageLoading = true;
   bool bannerImageLoading = true;
+  bool ticketCardsLoading = true;
 
   @override
   void initState() {
@@ -35,22 +39,26 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     organizerImage.image.resolve(const ImageConfiguration()).addListener(
       ImageStreamListener(
         (image, synchronousCall) {
-          setState(
-            () {
-              organizerImageLoading = false;
-            },
-          );
+          if (mounted) {
+            setState(
+              () {
+                organizerImageLoading = false;
+              },
+            );
+          }
         },
       ),
     );
     bannerImage.image.resolve(const ImageConfiguration()).addListener(
       ImageStreamListener(
         (image, synchronousCall) {
-          setState(
-            () {
-              bannerImageLoading = false;
-            },
-          );
+          if (mounted) {
+            setState(
+              () {
+                bannerImageLoading = false;
+              },
+            );
+          }
         },
       ),
     );
@@ -60,6 +68,34 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         setState(() {
           this.details = details;
         });
+      }
+    });
+    getEventTickets(event: widget.event).then((resp) {
+      if (resp.success) {
+        if (resp.tickets.isEmpty) {
+          ticketCards.add(
+            const Text("There are no tickets for this event."),
+          );
+          setState(() {
+            ticketCardsLoading = false;
+          });
+        } else {
+          ticketCards = List<Widget>.from(
+            resp.tickets.map(
+              (ticket) => EventTicketCard(ticket: ticket),
+            ),
+          );
+          setState(() {
+            ticketCardsLoading = false;
+          });
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("An unexpected error has occurred."),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     });
   }
@@ -119,7 +155,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     alignment: Alignment.topLeft,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 36, left: 10),
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).viewPadding.top + 9,
+                          left: 10,
+                        ),
                         child: SizedBox(
                           width: 37.5,
                           height: 37.5,
@@ -200,6 +239,17 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         details != null
                             ? details!.pageWidgets
                             : generateEventDetailsSkeleton(),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 15, bottom: 10),
+                          child: Text(
+                            "Tickets",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        ...ticketCards,
                       ],
                     ),
                   ),

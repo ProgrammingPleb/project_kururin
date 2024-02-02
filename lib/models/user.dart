@@ -7,6 +7,8 @@ class User {
   String hashedPassword;
   String type;
   Uri? pictureUrl;
+  String email;
+  late String address;
 
   User({
     required this.id,
@@ -15,18 +17,24 @@ class User {
     required this.hashedPassword,
     required this.type,
     this.pictureUrl,
-  });
+    required this.email,
+    required String address,
+  }) {
+    this.address = address.replaceAll("\\n", "\n");
+  }
 
   factory User.fromJson(Map<String, dynamic> json) {
-    print(json);
     return User(
       id: json["id"],
       name: json["name"],
       username: json["username"],
       hashedPassword: json["hash"],
-      pictureUrl:
-          json.containsKey("pictureURL") ? Uri.parse(json["pictureURL"]) : null,
+      pictureUrl: json.containsKey("pictureURL")
+          ? Uri.parse(json["pictureURL"])
+          : Uri.parse("https://share.pleb.moe/u/BWkEaY.png"),
       type: json["type"],
+      email: json["email"],
+      address: json["address"],
     );
   }
 
@@ -38,6 +46,8 @@ class User {
       hashedPassword: "No Data",
       pictureUrl: Uri(),
       type: "Attendee",
+      email: "No Data",
+      address: "No Data",
     );
   }
 
@@ -49,6 +59,8 @@ class User {
       "hash": hashedPassword,
       "pictureURL": pictureUrl.toString(),
       "type": type,
+      "email": email,
+      "address": address,
     };
 
     return userData;

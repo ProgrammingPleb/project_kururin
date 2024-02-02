@@ -43,6 +43,8 @@ dependencies:
   pull_to_refresh: ^2.0.0
   shared_preferences: ^2.2.2
   logger: ^2.0.2+1
+  barcode: ^2.2.6
+  barcode_widget: ^2.0.4
 
 dev_dependencies:
   flutter_test:

@@ -33,7 +33,7 @@ NavigationDestination getQuickNavButton(User? user) {
     );
   }
   return const NavigationDestination(
-    icon: Icon(Icons.confirmation_number),
+    icon: Icon(Icons.login),
     label: "Log In",
   );
 }

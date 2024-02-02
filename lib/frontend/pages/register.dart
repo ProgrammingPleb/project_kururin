@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  "Login",
+                                  "Register",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Theme.of(context)
@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
                       const Padding(
                         padding: EdgeInsets.only(top: 15),
                         child: Text(
-                          "Welcome back!",
+                          "Hello!",
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color.fromARGB(255, 240, 240, 240),

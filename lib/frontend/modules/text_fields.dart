@@ -45,6 +45,7 @@ class SimpleTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final Color? textColor;
   final Iterable<String>? autofillHints;
+  final String? Function(String?)? validator;
 
   const SimpleTextFormField({
     super.key,
@@ -52,6 +53,7 @@ class SimpleTextFormField extends StatelessWidget {
     required this.controller,
     this.textColor,
     this.autofillHints,
+    this.validator,
   });
 
   @override
@@ -74,6 +76,7 @@ class SimpleTextFormField extends StatelessWidget {
             child: TextFormField(
               controller: controller,
               autofillHints: autofillHints,
+              validator: validator,
               style: TextStyle(
                 color: textColor,
               ),
